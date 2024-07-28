@@ -1,6 +1,14 @@
 import { buildClient } from "@datocms/cma-client-node";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new Response("Unauthorized", {
+      status: 401,
+    });
+  }
+
   const client = buildClient({
     apiToken: process.env.DATOCMS_FULLACCESS_TOKEN as string,
   });
@@ -24,5 +32,5 @@ export async function GET() {
     id: `backup-plugin-weekly-${new Date().toISOString().split("T")[0]}`,
   });
 
-  return Response.json({ status: 200 });
+  return Response.json({ success: true });
 }
